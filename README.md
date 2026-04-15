@@ -47,12 +47,3 @@ docker-compose up --build
 - **Vendedor**: Acceso a POS.
 - **Cocina**: Acceso a Monitor de Cocina.
 
-## 📊 Endpoints Utilizados
-El sistema se conecta a un backend que debe exponer:
-- `/auth/login`
-- `/personal` (CRUD)
-- `/productos`, `/recetas`, `/menu`, `/paquetes`
-- `/ventas`
-- `/gastos`
-- `/dashboard/...` (Estadísticas)
-- `/finanzas/punto-equilibrio`
