@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { finanzasService } from '../services/finanzasService';
-import { Wallet, ArrowDownCircle, Plus, X } from 'lucide-react';
+import { Wallet, ArrowDownCircle, Plus, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const Finanzas = () => {
   const [gastos, setGastos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ concepto: '', monto: '', categoria: 'fijo' });
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => { loadGastos(); }, []);
 
@@ -20,9 +23,23 @@ const Finanzas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await finanzasService.createGasto(formData);
-    setShowModal(false);
-    loadGastos();
+    setSubmitting(true);
+    setError(null);
+    try {
+      await finanzasService.createGasto(formData);
+      setSuccess("Gasto registrado correctamente");
+      setTimeout(() => {
+        setShowModal(false);
+        setFormData({ concepto: '', monto: '', categoria: 'fijo' });
+        setSuccess(null);
+      }, 1500);
+      loadGastos();
+    } catch (error) {
+      console.error("Error creating gasto", error);
+      setError(error.response?.data?.message || "Error al registrar el gasto");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) return <div>Cargando finanzas...</div>;
@@ -93,6 +110,18 @@ const Finanzas = () => {
               <button onClick={() => setShowModal(false)}><X /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center text-sm">
+                  <AlertCircle size={18} className="mr-2 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm">
+                  <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                  {success}
+                </div>
+              )}
               <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-700">Concepto</label>
                 <input required className="w-full px-3 py-2 border rounded-lg" value={formData.concepto} onChange={e => setFormData({...formData, concepto: e.target.value})} />
@@ -108,8 +137,12 @@ const Finanzas = () => {
                   <option value="variable">Variable</option>
                 </select>
               </div>
-              <button type="submit" className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors">
-                Registrar Gasto
+              <button
+                type="submit"
+                disabled={submitting || !!success}
+                className="w-full py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Registrando...' : 'Registrar Gasto'}
               </button>
             </form>
           </div>
