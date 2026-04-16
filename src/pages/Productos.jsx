@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { productoService } from '../services/productoService';
-import { Plus, Edit2, Trash2, X, Save, ChefHat, BookOpen, Package } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, ChefHat, BookOpen, Package, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const Productos = () => {
   const [activeTab, setActiveTab] = useState('productos');
@@ -8,6 +8,9 @@ const Productos = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({ nombre: '', costo: '', precio: '', descripcion: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => { loadData(); }, [activeTab]);
 
@@ -26,6 +29,8 @@ const Productos = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
       if (editingId) {
         if (activeTab === 'productos') await productoService.updateProducto(editingId, formData);
@@ -37,12 +42,19 @@ const Productos = () => {
         else await productoService.createPaquetes(formData);
       }
 
-      setShowModal(false);
-      setEditingId(null);
-      setFormData({ nombre: '', costo: '', precio: '', descripcion: '' });
+      setSuccess("Elemento guardado correctamente");
+      setTimeout(() => {
+        setShowModal(false);
+        setEditingId(null);
+        setFormData({ nombre: '', costo: '', precio: '', descripcion: '' });
+        setSuccess(null);
+      }, 1500);
       loadData();
     } catch (error) {
       console.error("Error saving", error);
+      setError(error.response?.data?.message || "Error al guardar los cambios");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -136,14 +148,30 @@ const Productos = () => {
               <button onClick={() => setShowModal(false)}><X /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center text-sm">
+                  <AlertCircle size={18} className="mr-2 flex-shrink-0" />
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm">
+                  <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                  {success}
+                </div>
+              )}
               <Input label="Nombre" value={formData.nombre} onChange={v => setFormData({...formData, nombre: v})} />
               <div className="grid grid-cols-2 gap-4">
                 <Input label="Costo" type="number" value={formData.costo} onChange={v => setFormData({...formData, costo: v})} />
                 <Input label="Precio Venta" type="number" value={formData.precio} onChange={v => setFormData({...formData, precio: v})} />
               </div>
               <Input label="Descripción" value={formData.descripcion} onChange={v => setFormData({...formData, descripcion: v})} />
-              <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors">
-                {editingId ? 'Actualizar' : 'Guardar'}
+              <button
+                type="submit"
+                disabled={loading || !!success}
+                className="w-full py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Guardando...' : editingId ? 'Actualizar' : 'Guardar'}
               </button>
             </form>
           </div>

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { personalService } from '../services/personalService';
-import { Plus, Edit2, Trash2, X, Save } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const Personal = () => {
   const [personal, setPersonal] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const [formData, setFormData] = useState({
     nombres: '', apellidoPaterno: '', apellidoMaterno: '', rfc: '', imss: '',
     telefono: '', correo: '', usuario: '', contraseña: '', diasLaborales: '',
@@ -21,20 +24,29 @@ const Personal = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError(null);
     try {
       if (editingId) await personalService.update(editingId, formData);
       else await personalService.create(formData);
 
-      setShowModal(false);
-      setEditingId(null);
-      setFormData({
-        nombres: '', apellidoPaterno: '', apellidoMaterno: '', rfc: '', imss: '',
-        telefono: '', correo: '', usuario: '', contraseña: '', diasLaborales: '',
-        horario: '', sueldo: ''
-      });
+      setSuccess("Empleado guardado correctamente");
+      setTimeout(() => {
+        setShowModal(false);
+        setEditingId(null);
+        setFormData({
+          nombres: '', apellidoPaterno: '', apellidoMaterno: '', rfc: '', imss: '',
+          telefono: '', correo: '', usuario: '', contraseña: '', diasLaborales: '',
+          horario: '', sueldo: ''
+        });
+        setSuccess(null);
+      }, 1500);
       loadPersonal();
     } catch (error) {
       console.error("Error saving personal", error);
+      setError(error.response?.data?.message || "Error al guardar el empleado");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +115,22 @@ const Personal = () => {
               <button onClick={() => setShowModal(false)}><X /></button>
             </div>
             <form onSubmit={handleSubmit} className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(error || success) && (
+                <div className="col-span-full">
+                  {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl flex items-center text-sm mb-4">
+                      <AlertCircle size={18} className="mr-2 flex-shrink-0" />
+                      {error}
+                    </div>
+                  )}
+                  {success && (
+                    <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm mb-4">
+                      <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                      {success}
+                    </div>
+                  )}
+                </div>
+              )}
               <Input label="Nombres" value={formData.nombres} onChange={v => setFormData({...formData, nombres: v})} />
               <Input label="Apellido Paterno" value={formData.apellidoPaterno} onChange={v => setFormData({...formData, apellidoPaterno: v})} />
               <Input label="Apellido Materno" value={formData.apellidoMaterno} onChange={v => setFormData({...formData, apellidoMaterno: v})} />
@@ -118,8 +146,12 @@ const Personal = () => {
 
               <div className="col-span-full pt-6 flex justify-end space-x-4">
                 <button type="button" onClick={() => setShowModal(false)} className="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancelar</button>
-                <button type="submit" className="px-6 py-2 bg-blue-600 text-white rounded-lg flex items-center hover:bg-blue-700">
-                  <Save size={20} className="mr-2" /> Guardar
+                <button
+                  type="submit"
+                  disabled={loading || !!success}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg flex items-center hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Save size={20} className="mr-2" /> {loading ? 'Guardando...' : 'Guardar'}
                 </button>
               </div>
             </form>
