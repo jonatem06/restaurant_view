@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { productoService } from '../services/productoService';
-import { Plus, Edit2, Trash2, X, Save, ChefHat, BookOpen, Package, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, ChefHat, BookOpen, Package, AlertCircle, CheckCircle } from 'lucide-react';
 
 const Productos = () => {
   const [activeTab, setActiveTab] = useState('productos');
@@ -156,7 +156,7 @@ const Productos = () => {
               )}
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm">
-                  <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                  <CheckCircle size={18} className="mr-2 flex-shrink-0" />
                   {success}
                 </div>
               )}
