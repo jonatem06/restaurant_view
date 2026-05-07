@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { finanzasService } from '../services/finanzasService';
-import { Wallet, ArrowDownCircle, Plus, X, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Wallet, ArrowDownCircle, Plus, X, AlertCircle, CheckCircle } from 'lucide-react';
 
 const Finanzas = () => {
   const [gastos, setGastos] = useState([]);
@@ -118,7 +118,7 @@ const Finanzas = () => {
               )}
               {success && (
                 <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm">
-                  <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                  <CheckCircle size={18} className="mr-2 flex-shrink-0" />
                   {success}
                 </div>
               )}

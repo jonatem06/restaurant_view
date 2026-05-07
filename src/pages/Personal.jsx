@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { personalService } from '../services/personalService';
-import { Plus, Edit2, Trash2, X, Save, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Save, AlertCircle, CheckCircle } from 'lucide-react';
 
 const Personal = () => {
   const [personal, setPersonal] = useState([]);
@@ -125,7 +125,7 @@ const Personal = () => {
                   )}
                   {success && (
                     <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-xl flex items-center text-sm mb-4">
-                      <CheckCircle2 size={18} className="mr-2 flex-shrink-0" />
+                      <CheckCircle size={18} className="mr-2 flex-shrink-0" />
                       {success}
                     </div>
                   )}
